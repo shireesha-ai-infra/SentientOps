@@ -1,6 +1,8 @@
 pypdf
 pathlib
 sentence_transformers
+faiss-cpu
+numpy
 langchain
 langchain_core
 langchain_community
