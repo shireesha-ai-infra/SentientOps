@@ -3,41 +3,41 @@ from src.embed import create_embeddings, model
 from src.retrieve import VectorStore
 from src.generate import generate_answer
 
-# Data Ingestion
-texts = load_pdfs("data/pdf_files")
+def build_rag_pipeline(pdf_dir:str):
+    # One-time setup
+    # Data Ingestion
+    texts = load_pdfs("data/pdf_files")
 
-# Create Embeddings
-chunks, embeddings = create_embeddings(texts)
+    # Create Embeddings
+    chunks, embeddings = create_embeddings(texts)
 
-# Query for search
-query = 'What is this document about?'
+    # Store the embeddings in vector DB
+    store = VectorStore(embeddings)
 
-# creating embeddings for query
-query_emb = model.encode(query)
-
-# Store the embeddings in vector DB
-store = VectorStore(embeddings)
-
-# Retrieve (by semantic search)
-indices = store.search(query_emb)
+    return chunks, store
 
 
-print(len(texts))
-print(len(chunks))
-print(embeddings.shape)
-print(query_emb.shape)
-
-for i in indices:
-    print(chunks[i][:500])
-
-def ask(question):
+def ask(question:str, chunks, store):
+    # creating embeddings for query
     query_emb = model.encode(question)
-    idxs = store.search(query_emb)
 
-    context = [chunks[i] for i in idxs]
+    # Retrieve (by semantic search)
+    indices = store.search(query_emb)
+
+    context = [chunks[i] for i in indices]
     answer = generate_answer(context, question)
 
-    return answer
+    return answer.strip()
 
 if __name__ == "__main__":
-    print(ask("summarize the document"))
+    # Build pipeline once
+    chunks, store = build_rag_pipeline("data/pdf_files")
+
+
+    # Query for search
+    query = 'What is this document about?'
+
+    output = ask(query, chunks, store)
+
+    print(f"\n Query: {query}")
+    print(f"\n Output: {output}")
