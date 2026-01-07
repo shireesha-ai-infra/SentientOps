@@ -1,17 +1,14 @@
 # Using retreived chunks to answer the question - Augumented Generation
-# Plugging in the real OPENAI LLM
 
-from dotenv import load_dotenv
-from openai import OpenAI
-import os
+from llama_cpp import Llama
 
-# Loading the env variable
-load_dotenv()
-
-# Create OPENAI Client
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
-print("OPENAI_API_KEY loaded:", os.getenv("OPENAI_API_KEY"))
+# Load model once
+llm = Llama(
+    model_path="models/llama-2-7b-chat.Q5_K_M.gguf",
+    n_ctx=4096,
+    n_threads=8,
+    temperature=0
+)
 
 def generate_answer(context_chunks, question):
     context = "\n\n".join(context_chunks)
@@ -19,19 +16,19 @@ def generate_answer(context_chunks, question):
     prompt = f"""
 You are an helpful assistant.
 Answer the question using ONLY the context below.
-If the answe is not present in the context, say "I don't know
+If the answer is not present in the context, say "I don't know
 
 Context:
 {context}
 
 Question:
 {question}
+[/INST]
 """
-    response = client.chat.completions.create(
-        model= "gpt-5.2",
-        messages = [
-            {"role":"user", "content":prompt}
-        ],
-        temperature=0
+    output = llm(
+        prompt,
+        max_tokens=512,
+        stop=["</s>"]
     )
-    return response.choices[0].message.content
+    
+    return output["choices"][0]["text"].strip()

@@ -4,6 +4,7 @@ sentence_transformers
 faiss-cpu
 numpy
 dotenv
+llama-cpp-python
 langchain
 langchain_core
 langchain_community
