@@ -5,6 +5,8 @@ faiss-cpu
 numpy
 dotenv
 llama-cpp-python
+fastapi
+uvicorn
 langchain
 langchain_core
 langchain_community

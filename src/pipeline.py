@@ -1,7 +1,7 @@
-from src.ingest import load_pdfs
-from src.embed import create_embeddings, model
-from src.retrieve import VectorStore
-from src.generate import generate_answer
+from ingest import load_pdfs
+from embed import create_embeddings, model
+from retrieve import VectorStore
+from generate import generate_answer
 
 def build_rag_pipeline(pdf_dir:str):
     # One-time setup
