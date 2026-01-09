@@ -4,9 +4,9 @@ from llama_cpp import Llama
 
 # Load model once
 llm = Llama(
-    model_path="models/llama-2-7b-chat.Q5_K_M.gguf",
-    n_ctx=4096,
-    n_threads=8,
+    model_path="models/phi2/phi-2.Q4_K_M.gguf",
+    n_ctx=2048,
+    n_threads=6,
     temperature=0,
     verbose=False
 )
@@ -14,22 +14,24 @@ llm = Llama(
 def generate_answer(context_chunks, question):
     context = "\n\n".join(context_chunks)
 
-    prompt = f"""
+    prompt = f"""Instruction:
 You are an helpful assistant.
-Answer the question using ONLY the context below.
-If the answer is not present in the context, say "I don't know
+
+Use ONLY the information in the context below to answer the question.
+If the answer cannot be found in the context, respond exactly with "I don't know
 
 Context:
 {context}
 
 Question:
 {question}
-[/INST]
+
+Answer:
 """
     output = llm(
         prompt,
-        max_tokens=512,
-        stop=["</s>"]
+        max_tokens=256,
+        stop=["Question:", "Context:"]
     )
     
     return output["choices"][0]["text"].strip()
