@@ -1,7 +1,7 @@
-from ingest import load_pdfs
-from embed import create_embeddings, model
-from retrieve import VectorStore
-from generate import generate_answer
+from src.ingest import load_pdfs
+from src.embed import create_embeddings, model
+from src.retrieve import VectorStore
+from src.generate import generate_answer
 
 def build_rag_pipeline(pdf_dir:str):
     # One-time setup
@@ -28,16 +28,3 @@ def ask(question:str, chunks, store):
     answer = generate_answer(context, question)
 
     return answer.strip()
-
-if __name__ == "__main__":
-    # Build pipeline once
-    chunks, store = build_rag_pipeline("data/pdf_files")
-
-
-    # Query for search
-    query = 'What is this document about?'
-
-    output = ask(query, chunks, store)
-
-    print(f"\n Query: {query}")
-    print(f"\n Output: {output}")
