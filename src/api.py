@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 
+from src.metrics import get_metrics
 from src.pipeline import build_rag_pipeline, ask
 
 app = FastAPI()
@@ -15,11 +16,20 @@ class QueryRequest(BaseModel):
 # --------- API Endpoint -----------------
 @app.post("/query")
 def query_rag(request: QueryRequest):
-    answer = ask(request.question, chunks, store)
+    result = ask(request.question, chunks, store)
+
     return {
         "question" : request.question,
-        "answer" : answer
+        "answer" : result["answer"],
+        "latency_seconds": result["latency_seconds"],
+        "retrieval_time_seconds": result["retrieval_time_seconds"],
+        "generation_time_seconds": result["generation_time_seconds"]
     }
+
+# ----------- Metrics ---------------------
+@app.get("/metrics")
+def metrics():
+    return get_metrics()
 
 # ----------- Health check ----------------
 @app.get("/health")
