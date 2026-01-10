@@ -1,7 +1,7 @@
 # Using retreived chunks to answer the question - Augumented Generation
 
 from llama_cpp import Llama
-from prompts import ACTIVE_PROMPT
+from src.prompts import ACTIVE_PROMPT
 
 # Load model once
 llm = Llama(

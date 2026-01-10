@@ -1,6 +1,6 @@
-from pipeline import build_rag_pipeline, ask
-from eval_questions import EVAL_QUESTIONS
-from pipeline import PDF_DIR
+from src.pipeline import build_rag_pipeline, ask
+from src.eval_questions import EVAL_QUESTIONS
+from src.pipeline import PDF_DIR
 
 def run_evaluation():
     print("Running Evaluation....")

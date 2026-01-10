@@ -7,6 +7,7 @@ from src.pipeline import build_rag_pipeline, ask
 app = FastAPI()
 
 PDF_DIR = "data/pdf_files"
+
 chunks, store = build_rag_pipeline(PDF_DIR)
 
 # -------- REQUEST SCHEMA --------------
@@ -16,6 +17,7 @@ class QueryRequest(BaseModel):
 # --------- API Endpoint -----------------
 @app.post("/query")
 def query_rag(request: QueryRequest):
+
     result = ask(request.question, chunks, store)
 
     return {

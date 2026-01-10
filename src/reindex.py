@@ -1,9 +1,9 @@
-from ingest import load_pdfs
-from embed import create_embeddings
-from retrieve import VectorStore
+from src.ingest import load_pdfs
+from src.embed import create_embeddings
+from src.retrieve import VectorStore
 import pickle
 import os
-from pipeline import VECTOR_STORE_PATH, CHUNKS_PATH, PDF_DIR
+from src.pipeline import VECTOR_STORE_PATH, CHUNKS_PATH, PDF_DIR
 
 def rebuild_index():
     print("Re-indexing started...")

@@ -1,18 +1,18 @@
-from ingest import load_pdfs
-from embed import create_embeddings, model
-from retrieve import VectorStore
-from generate import generate_answer
-from logging_utils import log_chunks, log_query, log_latency, log_output
+from src.ingest import load_pdfs
+from src.embed import create_embeddings, model
+from src.retrieve import VectorStore
+from src.generate import generate_answer
+from src.logging_utils import log_chunks, log_query, log_latency, log_output
 from time import time
-from metrics import (
+from src.metrics import (
     record_request,
     record_latency,
     record_retrieval_time,
-    record_generation_time,
-    get_metrics
+    record_generation_time
 )
 import pickle
 import os
+from src.cache import get_cached_answer, set_cached_answer
 
 VECTOR_STORE_PATH = "data/vector_store.pkl"
 CHUNKS_PATH = "data/chunks.pkl"
@@ -40,6 +40,18 @@ def build_rag_pipeline(pdf_dir:str):
 
 
 def ask(question:str, chunks, store):
+    # --- Checking Cache first ------
+    cached = get_cached_answer(question)
+    if cached is not None:
+        return {
+            "answer": cached,
+            "latency_seconds": 0.0,
+            "retrieval_time_seconds": 0.0,
+            "generation_time_seconds": 0.0,
+            "cached": True
+        }
+    
+
     start_time = time()
     
     # ----- request count -------
@@ -71,9 +83,13 @@ def ask(question:str, chunks, store):
     record_latency(latency)
     log_latency(latency)
 
+    # ----- Save in cache -------
+    set_cached_answer(question, answer.strip())
+
     return {
         "answer": answer.strip(), 
         "latency_seconds": latency,
         "retrieval_time_seconds": retrieval_time,
-        "generation_time_seconds": generation_time
+        "generation_time_seconds": generation_time,
+        "cached": False
     }
