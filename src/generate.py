@@ -1,6 +1,7 @@
 # Using retreived chunks to answer the question - Augumented Generation
 
 from llama_cpp import Llama
+from prompts import ACTIVE_PROMPT
 
 # Load model once
 llm = Llama(
@@ -14,20 +15,10 @@ llm = Llama(
 def generate_answer(context_chunks, question):
     context = "\n\n".join(context_chunks)
 
-    prompt = f"""Instruction:
-You are an helpful assistant.
-
-Use ONLY the information in the context below to answer the question.
-If the answer cannot be found in the context, respond exactly with "I don't know
-
-Context:
-{context}
-
-Question:
-{question}
-
-Answer:
-"""
+    prompt = ACTIVE_PROMPT.format(
+        context = context,
+        question = question
+    )
     output = llm(
         prompt,
         max_tokens=256,
