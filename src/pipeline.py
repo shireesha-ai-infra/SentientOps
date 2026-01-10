@@ -1,28 +1,40 @@
-from src.ingest import load_pdfs
-from src.embed import create_embeddings, model
-from src.retrieve import VectorStore
-from src.generate import generate_answer
-from src.logging_utils import log_chunks, log_query, log_latency, log_output
+from ingest import load_pdfs
+from embed import create_embeddings, model
+from retrieve import VectorStore
+from generate import generate_answer
+from logging_utils import log_chunks, log_query, log_latency, log_output
 from time import time
-from src.metrics import (
+from metrics import (
     record_request,
     record_latency,
     record_retrieval_time,
     record_generation_time,
     get_metrics
 )
+import pickle
+import os
 
+VECTOR_STORE_PATH = "data/vector_store.pkl"
+CHUNKS_PATH = "data/chunks.pkl"
+PDF_DIR = "data/pdf_files"
 
 def build_rag_pipeline(pdf_dir:str):
-    # One-time setup
-    # Data Ingestion
-    texts = load_pdfs("data/pdf_files")
 
-    # Create Embeddings
-    chunks, embeddings = create_embeddings(texts)
+    if os.path.exists(VECTOR_STORE_PATH) and os.path.exists(CHUNKS_PATH):
+        with open(VECTOR_STORE_PATH, "rb") as f:
+            store = pickle.load(f)
+        with open(CHUNKS_PATH, "rb") as f:
+            chunks = pickle.load(f)
+    
+    else:
+        # Data Ingestion
+        texts = load_pdfs(PDF_DIR)
 
-    # Store the embeddings in vector DB
-    store = VectorStore(embeddings)
+        # Create Embeddings
+        chunks, embeddings = create_embeddings(texts)
+
+        # Store the embeddings in vector DB
+        store = VectorStore(embeddings)
 
     return chunks, store
 

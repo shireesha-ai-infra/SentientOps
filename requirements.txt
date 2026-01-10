@@ -8,7 +8,7 @@ llama-cpp-python
 fastapi
 uvicorn
 logging
-
+pickle
 
 langchain
 langchain_core
