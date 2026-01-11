@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run RAG Pipeline (module mode)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "src.pipeline",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    }
+  ]
+}
