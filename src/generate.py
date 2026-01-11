@@ -41,6 +41,11 @@ def get_llm():
 
 def generate_answer(context_chunks, question):
     llm = get_llm()
+    print("\n=== RETRIEVED CONTEXT ===")
+    for i, c in enumerate(context_chunks):
+        print(f"\n--- Chunk {i} ---\n{c}")
+    print("========================\n")
+
     context = "\n\n".join(context_chunks)
 
     prompt = ACTIVE_PROMPT.format(

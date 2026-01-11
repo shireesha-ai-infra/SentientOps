@@ -26,3 +26,6 @@ def log_latency(latency: float):
 
 def log_output(answer:str):
     logger.info(f"OUTPUT: {answer}")
+
+def log_msg(msg:str):
+    logger.info(f"{msg}")

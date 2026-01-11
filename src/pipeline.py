@@ -11,7 +11,8 @@ from src.logging_utils import (
     log_chunks, 
     log_query, 
     log_latency, 
-    log_output
+    log_output,
+    log_msg
 )
 
 from src.metrics import (
@@ -50,11 +51,10 @@ def build_rag_pipeline(pdf_dir:str):
         texts = load_pdfs(PDF_DIR)
 
         # Create Embeddings
-        chunks, embeddings = create_embeddings(texts)
+        chunks, embeddings = create_embeddings(texts)        
 
         # Store the embeddings in vector DB
         store = VectorStore(embeddings)
-
     return chunks, store
 
 
