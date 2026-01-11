@@ -9,9 +9,10 @@ class VectorStore:
         self.index.add(embeddings)
         self.embeddings = embeddings
 
-    def search(self, query_embedding, k=3):
+    def search(self, query_embedding, top_k=3):
         distances, indices = self.index.search(
-            np.array([query_embedding]),k
+            np.array([query_embedding]),top_k
         )
-        return indices[0]
+        similarities = 1- distances[0]
+        return indices[0], similarities
         
