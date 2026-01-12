@@ -34,7 +34,6 @@ CHUNKS_PATH = "data/chunks.pkl"
 PDF_DIR = "data/pdf_files"
 
 def build_rag_pipeline(pdf_dir:str):
-
     if os.path.exists(VECTOR_STORE_PATH) and os.path.exists(CHUNKS_PATH):
         with open(VECTOR_STORE_PATH, "rb") as f:
             store = pickle.load(f)
@@ -101,8 +100,8 @@ def ask(question:str, chunks, store):
                 "generation_time_seconds": 0.0,
                 "cached": False,
             }
-
-        # ---- Grounding Gate (THIS IS THE KEY) ----
+        """
+        # ---- Grounding Gate ----
         MAX_SIMILARITY = max(similarities)
 
         RELEVANCE_THRESHOLD = 0.30   # tune this
@@ -117,6 +116,7 @@ def ask(question:str, chunks, store):
                 "retrieval_time_seconds": retrieval_time,
                 "generation_time_seconds": 0.0,
             }
+        """
         
         # ------- Generation (with Timeout and only if grounded) --------        
         t2 = time()
