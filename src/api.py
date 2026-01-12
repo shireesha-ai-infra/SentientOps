@@ -3,6 +3,8 @@ from pydantic import BaseModel
 
 from src.metrics import get_metrics
 from src.pipeline import build_rag_pipeline, ask
+from src.prometheus_metrics import render_metrics
+from fastapi.responses import PlainTextResponse
 
 app = FastAPI()
 
@@ -37,3 +39,7 @@ def metrics():
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+@app.get("/metrics_prom", response_class=PlainTextResponse)
+def prometheus_metrics():
+    return render_metrics()

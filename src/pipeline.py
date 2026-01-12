@@ -17,9 +17,13 @@ from src.logging_utils import (
 
 from src.metrics import (
     record_request,
-    record_latency,
-    record_retrieval_time,
-    record_generation_time
+    record_avg_latency,
+    record_avg_generation_time,
+    record_avg_retrieval_time,
+    record_cache_hit,
+    record_tokens,
+    record_rejection,
+    COST_PER_1K_TOKENS
 )
 from src.cache import get_cached_answer, set_cached_answer
 from src.timeouts import run_with_timeout, TimeoutException
@@ -28,6 +32,17 @@ from src.fallbacks import (
     generation_error_fallback, 
     system_error_fallback
 )
+
+from src.prometheus_metrics import (
+    requests_total,
+    cache_hits,
+    rejections,
+    latency,
+    retrieval_time,
+    generation_time,
+    llm_cost,
+)
+
 
 VECTOR_STORE_PATH = "data/vector_store.pkl"
 CHUNKS_PATH = "data/chunks.pkl"
@@ -61,6 +76,11 @@ def ask(question:str, chunks, store):
     # ----- Cache check --------
     cached = get_cached_answer(question)
     if cached is not None:
+        record_cache_hit()
+        requests_total.inc()              
+        latency.set(0.0)                  
+        retrieval_time.set(0.0)          
+        generation_time.set(0.0)
         return {
             "answer": cached,
             "latency_seconds": 0.0,
@@ -68,12 +88,12 @@ def ask(question:str, chunks, store):
             "generation_time_seconds": 0.0,
             "cached": True
         }
-
+    
+    requests_total.inc()
     start_time = time()
 
     try:
         # ----- request logging -------
-        record_request()
         log_query(question)
 
         # ------- Retrieval  ----------
@@ -83,16 +103,20 @@ def ask(question:str, chunks, store):
 
         # Retrieve (by semantic search)
         indices, similarities = store.search(query_emb)
-        retrieval_time = time() - t1
-        record_retrieval_time(retrieval_time)
+        retrieval_time_value = time() - t1
+        record_avg_retrieval_time(retrieval_time_value)
+        retrieval_time.set(retrieval_time_value)  
+
 
         log_chunks(indices.tolist())
 
         # ------ Empty Retrieval handling ------
         if len(indices) == 0:
             answer = no_context_fallback(question)
-            latency = time() - start_time
-            record_latency(latency)
+            latency_value = time() - start_time
+            record_latency(latency_value)
+            latency.set(latency_value)   # 🔵 METRIC
+
             return {
                 "answer": answer,
                 "latency_seconds": latency,
@@ -107,6 +131,7 @@ def ask(question:str, chunks, store):
         RELEVANCE_THRESHOLD = 0.30   # tune this
 
         if MAX_SIMILARITY < RELEVANCE_THRESHOLD:
+            record_rejection()
             answer = no_context_fallback(question)
             latency = time() - start_time
             record_latency(latency)
@@ -128,18 +153,28 @@ def ask(question:str, chunks, store):
         try:
             answer = generate_answer(context, question)
             generation_time = time() - t2
+            generation_time.set(generation_time) 
         except TimeoutException:
             answer = generation_error_fallback()
             generation_time = 0.0
+        
+        approx_tokens = len(answer.split()) * 1.3
+        record_tokens(approx_tokens)
+        current_cost = (approx_tokens / 1000) * COST_PER_1K_TOKENS
+        llm_cost.set(current_cost) 
 
 
-        record_generation_time(generation_time)
+
+
+        record_avg_generation_time(generation_time)
 
         # log_output(answer.strip())
 
         # ---- Final Latency -------------
         latency = time() - start_time
-        record_latency(latency)
+        record_avg_latency(latency)
+        latency.set(latency)
+
         log_latency(latency)
 
         # ----- Save in cache -------
