@@ -114,8 +114,8 @@ def ask(question:str, chunks, store):
         if len(indices) == 0:
             answer = no_context_fallback(question)
             latency_value = time() - start_time
-            record_latency(latency_value)
-            latency.set(latency_value)   # 🔵 METRIC
+            record_avg_latency(latency_value)
+            latency.set(latency_value) 
 
             return {
                 "answer": answer,
