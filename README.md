@@ -19,3 +19,8 @@ SentientOps aims to:
 In short:
 
 Turn raw operational data into operational understanding.
+
+## 📚 Documentation
+
+*   **[Execution Guide](execution.md)**: Detailed instructions on how to set up, run, and monitor the system (Docker & Local).
+*   **[Code Reference](code_reference.md)**: Technical documentation for the codebase, explaining modules, functions, and variables.
