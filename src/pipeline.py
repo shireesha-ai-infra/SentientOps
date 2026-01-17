@@ -17,9 +17,10 @@ from src.logging_utils import (
 
 from src.metrics import (
     record_request,
-    record_avg_latency,
-    record_avg_generation_time,
-    record_avg_retrieval_time,
+    record_request,
+    record_latency,
+    record_generation_time,
+    record_retrieval_time,
     record_cache_hit,
     record_tokens,
     record_rejection,
@@ -90,6 +91,7 @@ def ask(question:str, chunks, store):
         }
     
     requests_total.inc()
+    record_request()
     start_time = time()
 
     try:
@@ -104,7 +106,7 @@ def ask(question:str, chunks, store):
         # Retrieve (by semantic search)
         indices, similarities = store.search(query_emb)
         retrieval_time_value = time() - t1
-        record_avg_retrieval_time(retrieval_time_value)
+        record_retrieval_time(retrieval_time_value)
         retrieval_time.set(retrieval_time_value)  
 
 
@@ -114,13 +116,13 @@ def ask(question:str, chunks, store):
         if len(indices) == 0:
             answer = no_context_fallback(question)
             latency_value = time() - start_time
-            record_avg_latency(latency_value)
+            record_latency(latency_value)
             latency.set(latency_value) 
 
             return {
                 "answer": answer,
-                "latency_seconds": latency,
-                "retrieval_time_seconds": retrieval_time,
+                "latency_seconds": latency_value,
+                "retrieval_time_seconds": retrieval_time_value,
                 "generation_time_seconds": 0.0,
                 "cached": False,
             }
@@ -152,11 +154,11 @@ def ask(question:str, chunks, store):
         
         try:
             answer = generate_answer(context, question)
-            generation_time = time() - t2
-            generation_time.set(generation_time) 
+            gen_time_val = time() - t2
+            generation_time.set(gen_time_val) 
         except TimeoutException:
             answer = generation_error_fallback()
-            generation_time = 0.0
+            gen_time_val = 0.0
         
         approx_tokens = len(answer.split()) * 1.3
         record_tokens(approx_tokens)
@@ -166,25 +168,25 @@ def ask(question:str, chunks, store):
 
 
 
-        record_avg_generation_time(generation_time)
+        record_generation_time(gen_time_val)
 
         # log_output(answer.strip())
 
         # ---- Final Latency -------------
-        latency = time() - start_time
-        record_avg_latency(latency)
-        latency.set(latency)
+        latency_val = time() - start_time
+        record_latency(latency_val)
+        latency.set(latency_val)
 
-        log_latency(latency)
+        log_latency(latency_val)
 
         # ----- Save in cache -------
         set_cached_answer(question, answer.strip())
 
         return {
             "answer": answer.strip(), 
-            "latency_seconds": latency,
-            "retrieval_time_seconds": retrieval_time,
-            "generation_time_seconds": generation_time,
+            "latency_seconds": latency_val,
+            "retrieval_time_seconds": retrieval_time_value,
+            "generation_time_seconds": gen_time_val,
             "cached": False
         }
     except Exception as e:
