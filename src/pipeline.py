@@ -126,7 +126,7 @@ def ask(question:str, chunks, store):
                 "generation_time_seconds": 0.0,
                 "cached": False,
             }
-        """
+        
         # ---- Grounding Gate ----
         MAX_SIMILARITY = max(similarities)
 
@@ -135,15 +135,16 @@ def ask(question:str, chunks, store):
         if MAX_SIMILARITY < RELEVANCE_THRESHOLD:
             record_rejection()
             answer = no_context_fallback(question)
-            latency = time() - start_time
-            record_latency(latency)
+            latency_val = time() - start_time
+            record_latency(latency_val)
+            latency.set(latency_val) 
             return {
                 "answer": answer,
-                "latency_seconds": latency,
-                "retrieval_time_seconds": retrieval_time,
+                "latency_seconds": latency_val,
+                "retrieval_time_seconds": retrieval_time_value,
                 "generation_time_seconds": 0.0,
+                "cached": False, 
             }
-        """
         
         # ------- Generation (with Timeout and only if grounded) --------        
         t2 = time()

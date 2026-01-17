@@ -53,9 +53,9 @@ Use this method for development or if Docker networking is restricted.
     ```
 3.  **Run the API**:
     ```bash
-    uvicorn src.api:app --host 0.0.0.0 --port 8080
+    uvicorn src.api:app --host 0.0.0.0 --port 8000
     ```
-    *(Note: We use port **8080** here to avoid conflicts if Docker is partially running. Adjust as needed.)*
+    *(Note: We use port **8000** to align with Prometheus configuration.)*
 
 ## 5. Execution: Asking Questions
 
